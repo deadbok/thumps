@@ -24,8 +24,45 @@ HASensorNumber              hum_sensor("Humidity", HASensorNumber::PrecisionP1);
 HASensorNumber              pres_sensor("Pressure", HASensorNumber::PrecisionP1);
 unsigned long               cycles = 0;
 
+/*
+ * Scan the I2C bus for devices.
+ */
 void scan_I2C();
 
+/*
+ * Connect to WiFi if disconnected.
+ */
+bool connect_wifi()
+{
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    cycles = 0;  
+    printf("Connecting to WiFi network: %s\n", WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    while ((WiFi.status() != WL_CONNECTED) && (cycles < 300))
+    {
+      delay(1000);
+      cycles += 1;
+      printf(".");
+    }
+    cycles = 0;
+    if (WiFi.status() == WL_CONNECTED)
+    {
+      printf("Connected!\n");
+      return(true);
+    }
+    else
+    {
+      printf("NOT connected!\n");
+      return(false);
+    }
+  }
+  return(true);  
+}
+
+/*
+ * Initialisation.
+ */
 void setup()
 {
   uint8_t init_map = 0xff;
@@ -83,7 +120,7 @@ void setup()
   }
 
   device.setUniqueId(mac, sizeof(mac));
-  device.setName("Temperature, humidity, and pressure sensor");
+  device.setName("THUMPS");
   device.setSoftwareVersion(VERSION_STRING);
   device.setManufacturer("deadbok");
   device.setModel("THUMPS-1");
@@ -99,44 +136,22 @@ void setup()
   pres_sensor.setIcon("mdi:gauge");
   pres_sensor.setUnitOfMeasurement("hPa");
 
-  cycles = 0;  
-  printf("Connecting to WiFi network: %s\n", WIFI_SSID);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  while ((WiFi.status() != WL_CONNECTED) && (cycles < 300))
-  {
-    delay(1000);
-    cycles += 1;
-    printf(".");
-  }
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    printf("Connected!\n");
-  }
-  else
-  {
-    printf("NOT connected!\n");
-  }
+  connect_wifi();
 
   mqtt.begin(MQTT_BROKER, MQTT_PORT, MQTT_USER, MQTT_PASSWORD);
 
   aht_temp = aht.getTemperatureSensor();
-  aht_temp->printSensorDetails();
-  Serial.printf("\n");
-
   aht_humidity = aht.getHumiditySensor();
-  aht_humidity->printSensorDetails();
-  Serial.printf("\n");
-
   bmp_temp = bmp.getTemperatureSensor();
-  bmp_temp->printSensorDetails();
-  Serial.printf("\n");
-
   bmp_pres = bmp.getPressureSensor();
-  bmp_pres->printSensorDetails();
+ 
   Serial.printf("\n");
   printf("--------------- Entering main loop ---------------\n\n");
 }
 
+/*
+ * Main loop.
+ */
 void loop()
 {
   sensors_event_t humidity;
@@ -168,10 +183,14 @@ void loop()
 
     cycles = 1;
   }
+  connect_wifi();
   mqtt.loop();
   cycles += 1;
 }
 
+/*
+ * Scan the I2C bus for devices.
+ */
 void scan_I2C()
 {
   uint8_t error, address, nDevices;

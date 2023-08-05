@@ -11,11 +11,13 @@
  * 
  * 0.8.0: Do not loop endlessly on failure to connect to the WiFi network.
  * 
+ * 0.8.1: - Added short function comments
+ *        - Reconnect to the WiFi network, if disconnected.
  */
  
 #ifndef _THUMPRESS_VERSION_H_
 #define _THUMPRESS_VERSION_H_
 
-#define VERSION_STRING "0.8.0"
+#define VERSION_STRING "0.8.1"
 
 #endif

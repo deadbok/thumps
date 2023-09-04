@@ -141,6 +141,9 @@ void setup()
   pres_sensor.setIcon("mdi:gauge");
   pres_sensor.setUnitOfMeasurement("hPa");
 
+  Serial.printf("Explicitly forcing station mode.\n");
+  WiFi.mode(WIFI_STA);
+
   connect_wifi();
 
   mqtt.begin(MQTT_BROKER, MQTT_PORT, MQTT_USER, MQTT_PASSWORD);
@@ -188,7 +191,10 @@ void loop()
     cycles = 1;
   }
   connect_wifi();
-  mqtt.loop();
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    mqtt.loop();
+  }
   cycles += 1;
 
   //Serial.printf("Going to sleep for 30 seconds...");

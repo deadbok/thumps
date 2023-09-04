@@ -15,11 +15,14 @@
  *        - Reconnect to the WiFi network, if disconnected.
  *
  * 0.8.2: Set hostname
+ * 
+ * 0.8.3: - Force station mode
+ *        - Run MQTT loop only if connected to the network
  */
  
 #ifndef _THUMPRESS_VERSION_H_
 #define _THUMPRESS_VERSION_H_
 
-#define VERSION_STRING "0.8.2"
+#define VERSION_STRING "0.8.3"
 
 #endif

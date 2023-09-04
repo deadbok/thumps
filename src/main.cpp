@@ -67,14 +67,19 @@ void setup()
 {
   uint8_t init_map = 0xff;
   byte mac[WL_MAC_ADDR_LENGTH];
-  
+  char hostname[20];
+
   WiFi.macAddress(mac);
   device.setUniqueId(mac, sizeof(mac));
 
+  sprintf(hostname, "THUMPS-%02x%02x%02x", mac[3], mac[4], mac[5]);
+  
   Wire.begin(I2C_SDA, I2C_SCL);
   Serial.begin(115200);
   Serial.printf("\n\nTHUMPRESS v%s\n\n", VERSION_STRING);
 
+  Serial.printf("Setting hostname: %s\n", hostname);
+  WiFi.hostname(hostname);
   Serial.printf("Initialising sensors:\n");
   while (init_map > 0)
   {
@@ -82,11 +87,11 @@ void setup()
     {
       if (!aht.begin())
       {
-        Serial.printf("ERROR initialising the AHT20 sensor.\n");
+        Serial.printf(" ERROR initialising the AHT20 sensor.\n");
       }
       else
       {
-        Serial.printf("The AHT20 sensor was initialised.\n");
+        Serial.printf(" The AHT20 sensor was initialised.\n");
         init_map &= 0b11111110;
       }
     }
@@ -95,11 +100,11 @@ void setup()
     {
       if (!bmp.begin())
       {
-        Serial.printf("ERROR initialising the BMP280 sensor.\n");
+        Serial.printf(" ERROR initialising the BMP280 sensor.\n");
       }
       else
       {
-        Serial.printf("The BMP280 sensor was initialised.\n");
+        Serial.printf(" The BMP280 sensor was initialised.\n");
         init_map &= 0b1111101;
       }
     }
@@ -179,13 +184,15 @@ void loop()
     temp_sensor.setValue(temp_avg);
     hum_sensor.setValue(humidity.relative_humidity);
     pres_sensor.setValue(pressure.pressure);
-    mqtt.loop();
 
     cycles = 1;
   }
   connect_wifi();
   mqtt.loop();
   cycles += 1;
+
+  //Serial.printf("Going to sleep for 30 seconds...");
+  //ESP.deepSleep(30e6);  
 }
 
 /*

@@ -13,11 +13,13 @@
  * 
  * 0.8.1: - Added short function comments
  *        - Reconnect to the WiFi network, if disconnected.
+ *
+ * 0.8.2: Set hostname
  */
  
 #ifndef _THUMPRESS_VERSION_H_
 #define _THUMPRESS_VERSION_H_
 
-#define VERSION_STRING "0.8.1"
+#define VERSION_STRING "0.8.2"
 
 #endif
